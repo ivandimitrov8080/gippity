@@ -4,7 +4,7 @@ Copyright © 2023 Ivan Dimitrov ivan@idimitrov.dev
 package cmd
 
 import (
-	"gippity/lib"
+	"github.com/ivandimitrov8080/gippity/lib"
 
 	"github.com/spf13/cobra"
 )
