@@ -1,0 +1,759 @@
+
+            This example shows you how to write the contents of a CSV file to a database table in Java using the CSVReader and 
+JdbcWriter classes.
+
+This example can easily be modified to show how to read from a database. Also refer  
+write a CSV to database (2) which shows a different way of writing a CSV file to a database.
+
+Input CSV file
+
+Account,LastName,FirstName,Balance,CreditLimit,AccountCreated,Rating
+101,Reeves,Keanu,9315.45,10000.00,1/17/1998,A
+312,Butler,Gerard,90.00,1000.00,8/6/2003,B
+868,Hewitt,Jennifer Love,0,17000.00,5/25/1985,B
+761,Pinkett-Smith,Jada,49654.87,100000.00,12/5/2006,A
+317,Murray,Bill,789.65,5000.00,2/5/2007,C
+
+
+Java Code listing
+
+
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.csv.CSVReader;
+import com.northconcepts.datapipeline.jdbc.JdbcWriter;
+import com.northconcepts.datapipeline.job.Job;
+
+public class WriteACsvFileToDatabase1 {
+    
+    public static void main(String[] args) throws Throwable {
+        // connect to the database
+        Driver driver = (Driver) Class.forName("sun.jdbc.odbc.JdbcOdbcDriver").newInstance();
+        Properties properties = new Properties();
+        properties.put("user", "scott");
+        properties.put("password", "tiger");
+        Connection connection = driver.connect("jdbc:odbc:dp-cookbook", properties);
+
+        DataReader reader = new CSVReader(new File("example/data/input/credit-balance-01.csv"))
+            .setFieldNamesInFirstRow(true);
+        
+        DataWriter writer = new  JdbcWriter(connection, "dp_credit_balance")
+            .setAutoCloseConnection(true)
+            .setBatchSize(100);;
+        
+        Job.run(reader, writer);
+    }
+
+}
+
+
+
+Code Walkthrough
+
+A JDBC Driver instance and a Connection 
+object is obtained in order to connect to the database, this is standard JDBC code. 
+A CSVReader is created corresponding to the input CSV file 
+credit-balance-01.csv.
+A JdbcWriter is created using the Connection object 
+and the output database table name dp_credit_balance.
+Data is transferred from the input CSV file to the database via JobTemplate.DEFAULT.transfer method.
+
+
+CSVReader
+
+
+CSVReader is an input reader which can be used to read CSV files.
+It is a sub-class of TextReader and inherits the 
+open and 
+close among other methods.
+The CSVReader.setFieldNamesInFirstRow(true) 
+method causes the CSVReader to use the names specified in the first row of the 
+input data as field names. If this method is not invoked, the fields would be named as A1, A2, etc. similar to MS Excel. If those fields names need to be changed, a rename 
+transformation can be added on top of CSVReader or any other type 
+(Refer Rename a field for example). 
+
+
+JdbcWriter
+A JdbcWriter is an output writer which can be used to write data to a database.
+It is created using a Connection object and a database table name. It is a sub-class of 
+DataWriter and overloads the 
+open,
+close and 
+write among other methods
+for JDBC access. An important method is the setAutoCloseConnection
+which when invoked with a true value instructs the JdbcWriter to close the 
+Connection when its close 
+method is invoked.
+
+
+Database Output
+
+The output of this program would be records inserted into the dp_credit_balance database table. 
+
+
+
+        
+            This example shows you how to write the contents of a CSV file to a database table in Java using the CSVReader and 
+JdbcWriter classes.
+
+This example can easily be modified to show how to read from a database. Also refer  
+write a CSV to database (2) which shows a different way of writing a CSV file to a database.
+
+Input CSV file
+
+Account,LastName,FirstName,Balance,CreditLimit,AccountCreated,Rating
+101,Reeves,Keanu,9315.45,10000.00,1/17/1998,A
+312,Butler,Gerard,90.00,1000.00,8/6/2003,B
+868,Hewitt,Jennifer Love,0,17000.00,5/25/1985,B
+761,Pinkett-Smith,Jada,49654.87,100000.00,12/5/2006,A
+317,Murray,Bill,789.65,5000.00,2/5/2007,C
+
+
+Java Code listing
+
+
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.csv.CSVReader;
+import com.northconcepts.datapipeline.jdbc.JdbcWriter;
+import com.northconcepts.datapipeline.job.Job;
+
+public class WriteACsvFileToDatabase1 {
+    
+    public static void main(String[] args) throws Throwable {
+        // connect to the database
+        Driver driver = (Driver) Class.forName("sun.jdbc.odbc.JdbcOdbcDriver").newInstance();
+        Properties properties = new Properties();
+        properties.put("user", "scott");
+        properties.put("password", "tiger");
+        Connection connection = driver.connect("jdbc:odbc:dp-cookbook", properties);
+
+        DataReader reader = new CSVReader(new File("example/data/input/credit-balance-01.csv"))
+            .setFieldNamesInFirstRow(true);
+        
+        DataWriter writer = new  JdbcWriter(connection, "dp_credit_balance")
+            .setAutoCloseConnection(true)
+            .setBatchSize(100);;
+        
+        Job.run(reader, writer);
+    }
+
+}
+
+
+
+Code Walkthrough
+
+A JDBC Driver instance and a Connection 
+object is obtained in order to connect to the database, this is standard JDBC code. 
+A CSVReader is created corresponding to the input CSV file 
+credit-balance-01.csv.
+A JdbcWriter is created using the Connection object 
+and the output database table name dp_credit_balance.
+Data is transferred from the input CSV file to the database via JobTemplate.DEFAULT.transfer method.
+
+
+CSVReader
+
+
+CSVReader is an input reader which can be used to read CSV files.
+It is a sub-class of TextReader and inherits the 
+open and 
+close among other methods.
+The CSVReader.setFieldNamesInFirstRow(true) 
+method causes the CSVReader to use the names specified in the first row of the 
+input data as field names. If this method is not invoked, the fields would be named as A1, A2, etc. similar to MS Excel. If those fields names need to be changed, a rename 
+transformation can be added on top of CSVReader or any other type 
+(Refer Rename a field for example). 
+
+
+JdbcWriter
+A JdbcWriter is an output writer which can be used to write data to a database.
+It is created using a Connection object and a database table name. It is a sub-class of 
+DataWriter and overloads the 
+open,
+close and 
+write among other methods
+for JDBC access. An important method is the setAutoCloseConnection
+which when invoked with a true value instructs the JdbcWriter to close the 
+Connection when its close 
+method is invoked.
+
+
+Database Output
+
+The output of this program would be records inserted into the dp_credit_balance database table. 
+
+
+
+        
+            This example shows you how to write the contents of a CSV file to a database table in Java using the CSVReader and 
+JdbcWriter classes.
+
+This example can be easily modified to show how to read from a database.  Also refer  
+write a CSV to database (1) which shows a different way of writing a CSV file to a database.
+
+Input CSV file
+
+Account,LastName,FirstName,Balance,CreditLimit,AccountCreated,Rating
+101,Reeves,Keanu,9315.45,10000.00,1/17/1998,A
+312,Butler,Gerard,90.00,1000.00,8/6/2003,B
+868,Hewitt,Jennifer Love,0,17000.00,5/25/1985,B
+761,Pinkett-Smith,Jada,49654.87,100000.00,12/5/2006,A
+317,Murray,Bill,789.65,5000.00,2/5/2007,C
+
+
+Java Code listing
+
+
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.core.Record;
+import com.northconcepts.datapipeline.csv.CSVReader;
+import com.northconcepts.datapipeline.jdbc.JdbcWriter;
+
+public class WriteACsvFileToDatabase2 {
+    
+    public static void main(String[] args) throws Throwable {
+        // connect to the database
+        Driver driver = (Driver) Class.forName("sun.jdbc.odbc.JdbcOdbcDriver").newInstance();
+        Properties properties = new Properties();
+        properties.put("user", "scott");
+        properties.put("password", "tiger");
+        Connection connection = driver.connect("jdbc:odbc:dp-cookbook", properties);
+
+        DataReader reader = new CSVReader(new File("example/data/input/credit-balance-01.csv"))
+            .setFieldNamesInFirstRow(true);
+        
+        DataWriter writer = new  JdbcWriter(connection, "dp_credit_balance")
+            .setAutoCloseConnection(true)
+            .setBatchSize(100);
+
+        reader.open();
+        writer.open();
+        try {
+            Record record;
+            while ((record = reader.read()) != null) {
+                writer.write(record);
+            }
+        } finally {
+            reader.close();
+            writer.close();
+        }
+    }
+
+}
+
+
+
+Code Walkthrough
+
+A JDBC Driver instance and a Connection 
+object is obtained in order to connect to the database, this is standard JDBC code.  
+A CSVReader is created corresponding to the input CSV file 
+credit-balance-01.csv.
+A JdbcWriter is created using the Connection object 
+and the output database table name dp_credit_balance.
+The reader.open 
+and writer.open methods are invoked to open the reader and writer respectively. 
+A while loop iterates through the data in the CSV.
+Each record in the CSV is read as a Record 
+object via the reader.read method and written to the database 
+via the writer.write method.
+After the while loop completes, the reader and writer are closed via reader.close
+and writer.close respectively in a finally block.
+
+
+CSVReader
+
+
+CSVReader is an input reader which can be used to read CSV files.
+It is a sub-class of TextReader and inherits the 
+open and 
+close among other methods.
+The CSVReader.setFieldNamesInFirstRow(true) 
+method causes the CSVReader to use the names specified in the first row of the 
+input data as field names. If this method is not invoked, the fields would be named as A1, A2, etc. similar to MS Excel. If those fields names need to be changed, a rename 
+transformation can be added on top of CSVReader or any other type 
+(Refer Rename a field for example). 
+
+
+JdbcWriter
+A JdbcWriter is an output writer used to write data to a database.
+It is created using a Connection object and a database table name. It is a sub-class of 
+DataWriter and overloads the 
+open,
+close and 
+write among other methods
+for JDBC access. An important method is the setAutoCloseConnection
+which when invoked with a true value instructs the JdbcWriter to close the 
+Connection when its close 
+method is invoked.
+
+
+Database Output
+
+The output of this program would be records inserted into the dp_credit_balance database table. 
+
+
+
+
+        
+            This example shows you how to write the contents of a CSV file to a Fixed Width file in Java using the CSVReader and FixedWidthWriter classes.
+Input CSV file
+Account,LastName,FirstName,Balance,CreditLimit,AccountCreated,Rating
+101,Reeves,Keanu,9315.45,10000.00,1/17/1998,A
+312,Butler,Gerard,90.00,1000.00,8/6/2003,B
+868,Hewitt,Jennifer Love,0,17000.00,5/25/1985,B
+761,Pinkett-Smith,Jada,49654.87,100000.00,12/5/2006,A
+317,Murray,Bill,789.65,5000.00,2/5/2007,C
+
+Java Code
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.csv.CSVReader;
+import com.northconcepts.datapipeline.fixedwidth.FixedWidthWriter;
+import com.northconcepts.datapipeline.job.Job;
+
+public class WriteACsvFileToFixedWidth {
+    
+    public static void main(String[] args) throws Throwable {
+        DataReader reader = new CSVReader(new File("example/data/input/credit-balance-01.csv"))
+            .setFieldNamesInFirstRow(true);
+        
+        FixedWidthWriter writer = new  FixedWidthWriter(new File("example/data/output/credit-balance-02.fw"));
+        writer.addFields(8);
+        writer.addFields(16);
+        writer.addFields(16);
+        writer.addFields(12);
+        writer.addFields(14);
+        writer.addFields(16);
+        writer.addFields(7);
+        
+        Job.run(reader, writer);
+    }
+
+}
+
+
+Code Walkthrough
+
+A CSVReader is created corresponding to the input CSV file credit-balance-01.csv.
+A FixedWidthWriter is created corresponding to the output Fixed Width file i.e. credit-balance-02.fw.
+The writer.addField(s) method is invoked for the fields that need to be written to the output file.
+Data is transferred from the input CSV file to the output Fixed Width file via the JobTemplate.DEFAULT.transfer method.
+
+Output Fixed Width file
+Account LastName        FirstName       Balance     CreditLimit   AccountCreated  Rating 
+101     Reeves          Keanu           9315.45     10000.00      1/17/1998       A      
+312     Butler          Gerard          90.00       1000.00       8/6/2003        B      
+868     Hewitt          Jennifer Love   0           17000.00      5/25/1985       B      
+761     Pinkett-Smith   Jada            49654.87    100000.00     12/5/2006       A      
+317     Murray          Bill            789.65      5000.00       2/5/2007        C      
+
+        
+            /*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.parquet;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DebugReader;
+import com.northconcepts.datapipeline.core.FieldType;
+import com.northconcepts.datapipeline.core.Record;
+import com.northconcepts.datapipeline.core.RecordList;
+import com.northconcepts.datapipeline.core.StreamWriter;
+import com.northconcepts.datapipeline.internal.lang.Moment;
+import com.northconcepts.datapipeline.job.Job;
+import com.northconcepts.datapipeline.memory.MemoryReader;
+import com.northconcepts.datapipeline.parquet.ParquetDataReader;
+import com.northconcepts.datapipeline.parquet.ParquetDataWriter;
+
+public class WriteAParquetFile {
+
+    private static final File PARQUET_FILE = new File("example/data/output/WriteAParquetFile.parquet");
+
+    public static void main(String[] args) {
+        System.out.println("============================================================");
+        System.out.println("Write records to a parquet file");
+        System.out.println("============================================================");
+
+        DataReader reader = new MemoryReader(createRecordList());
+        reader = new DebugReader(reader);
+        ParquetDataWriter writer = new ParquetDataWriter(PARQUET_FILE);
+        Job.run(reader, writer);
+
+        System.out.println("============================================================");
+        System.out.println("Prepared Schema");
+        System.out.println("============================================================");
+
+        System.out.println(writer.getSchema());
+
+        System.out.println("============================================================");
+        System.out.println("Read the parquet file");
+        System.out.println("============================================================");
+
+        Job.run(new ParquetDataReader(PARQUET_FILE), new StreamWriter(System.out));
+
+    }
+
+    public static RecordList createRecordList() {
+        RecordList recordList = new RecordList();
+
+        Record record1 = new Record();
+        record1.setField("BLOB", new byte[] { 2, 4, 6, 8, 10, 12 });
+        record1.setField("BOOLEAN", true);
+        record1.setField("BYTE", (byte) 97);
+        record1.setField("CHAR", 'A');
+        record1.setField("DATE", Moment.parseMoment("2014-12-25").getDatePart());
+        record1.setField("DATETIME", Moment.parseMoment("2014-12-25 13:41:57").getDate());
+        record1.setField("DOUBLE", 2048.1024);
+        record1.setField("FLOAT", 4096.32f);
+        record1.setField("INT", 8192);
+        record1.setField("LONG", 1152921504606846976L);
+        record1.setField("SHORT", (short) 32);
+        record1.setField("BIG_DECIMAL", new BigDecimal("123.456789"));
+        record1.setField("BIG_INTEGER", BigInteger.valueOf(123456L));
+        record1.setField("STRING", "A basic numeric constant is considered an integer.");
+        record1.setField("TIME", Moment.parseMoment("13:41:57").getTimePart());
+        record1.setField("Array-1", Arrays.asList("J", 234, new BigDecimal("456.789"), "A"));
+        record1.setField("Array-2", new String[] { "J", "A", "V", "A" });
+        record1.setField("Array-3", new Double[] { 123.123, 345.345, 456.456, 555.678 });
+
+
+        // Record with null values.
+        Record record2 = new Record();
+        record2.setFieldNull("BLOB", FieldType.BLOB);
+        record2.setFieldNull("BOOLEAN", FieldType.BOOLEAN);
+        record2.setFieldNull("BYTE", FieldType.BYTE);
+        record2.setFieldNull("CHAR", FieldType.CHAR);
+        record2.setFieldNull("DATE", FieldType.DATE);
+        record2.setFieldNull("DATETIME", FieldType.DATETIME);
+        record2.setFieldNull("DOUBLE", FieldType.DOUBLE);
+        record2.setFieldNull("FLOAT", FieldType.FLOAT);
+        record2.setFieldNull("INT", FieldType.INT);
+        record2.setFieldNull("LONG", FieldType.LONG);
+        record2.setFieldNull("SHORT", FieldType.SHORT);
+        record2.setFieldNull("BIG_DECIMAL", FieldType.BIG_DECIMAL);
+        record2.setFieldNull("BIG_INTEGER", FieldType.BIG_INTEGER);
+        record2.setFieldNull("STRING", FieldType.STRING);
+        record2.setFieldNull("TIME", FieldType.TIME);
+        record2.setFieldNull("Array-1", FieldType.UNDEFINED);
+        record2.setFieldNull("Array-2", FieldType.STRING);
+        record2.setFieldNull("Array-3", FieldType.DOUBLE);
+
+        recordList.add(record1, record2);
+        return recordList;
+    }
+}
+
+
+        
+            This example demonstrates how to read a local CSV file, convert it to a temporary Parquet file and then write that temporary file to an Amazon S3 bucket.
+CSV input
+ 
+Account,LastName,FirstName,Balance,CreditLimit,AccountCreated,Rating
+101,Reeves,Keanu,9315.45,10000,17-01-1998,A
+312,Butler,Gerard,90,1000,06-08-2003,B
+101,Hewitt,Jennifer Love,0,17000,25-05-1985,B
+312,Pinkett-Smith,Jada,49654.87,100000,05-12-2006,A
+317,Murray,Bill,789.65,5000,05-02-2007,C
+317,Murray,Bill,1,5000,05-02-2007,D
+
+Java Code
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.amazons3;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import com.northconcepts.datapipeline.amazons3.AmazonS3FileSystem;
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.csv.CSVReader;
+import com.northconcepts.datapipeline.job.Job;
+import com.northconcepts.datapipeline.parquet.ParquetDataWriter;
+
+public class WriteParquetToAmazonS3UsingATemporaryFile {
+
+    private static final String ACCESS_KEY = "YOUR ACCESS KEY";
+    private static final String SECRET_KEY = "YOUR SECRET KEY";
+
+    public static void main(String[] args) throws Throwable {
+
+        File parquetFile = File.createTempFile("credit-balance", ".parquet");
+        parquetFile.deleteOnExit();
+
+        try {
+            DataReader reader = new CSVReader(new File("example/data/input/credit-balance.csv"))
+                .setFieldNamesInFirstRow(true);
+            ParquetDataWriter writer = new ParquetDataWriter(parquetFile);
+
+            Job.run(reader, writer);
+
+            uploadFileToS3(parquetFile);
+        } finally {
+            parquetFile.delete();
+        }
+    }
+
+    private static void uploadFileToS3(File parquetFile) throws Throwable {
+        AmazonS3FileSystem s3 = new AmazonS3FileSystem();
+        try {
+            s3.setBasicAWSCredentials(ACCESS_KEY, SECRET_KEY);
+            s3.open();
+
+            OutputStream out = s3.writeMultipartFile("datapipeline-test-01", "output/credit-balance.parquet");
+            InputStream in = new BufferedInputStream(new FileInputStream(parquetFile));
+
+            byte[] buffer = new byte[1024];
+            int lengthRead;
+            while ((lengthRead = in.read(buffer)) > 0) {
+                out.write(buffer, 0, lengthRead);
+            }
+        } finally {
+            s3.close();
+        }
+    }
+}
+
+
+ 
+Code Walkthrough
+
+A temporary Parquet file is created and is set to delete itself on exit.
+A CSVReader is created to read from the local file credit-balance.csv.
+A ParquetDataWriter  is then created taking the temporary file for writing.
+Both the reader in step 2 and the writer in step 3 are ran inside a Job, writing the CSV to the temporary Parquet file.
+The file is uploaded to S3.
+
+        
+            In this example you are going to see how to write records to an Avro file using Data Pipeline's AvroWriter.
+This example can be easily modified to show you how to read an Avro File. 
+
+Avro  is an open source project that provides data serialization and data exchange services for Apache Hadoop.
+
+Java Code listing
+
+/*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+import java.util.Arrays;
+
+import com.northconcepts.datapipeline.avro.AvroWriter;
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.core.Record;
+import com.northconcepts.datapipeline.core.RecordList;
+import com.northconcepts.datapipeline.job.Job;
+import com.northconcepts.datapipeline.memory.MemoryReader;
+
+public class WriteAnAvroFile {
+    
+    public static void main(String[] args) {
+        DataReader reader = new MemoryReader(new RecordList(createRecord("One"), createRecord("Two"),
+                createRecord("Three")));
+        DataWriter writer = new AvroWriter(new File("example/data/output/bird-iq.avro"), null);
+        
+        Job.run(reader, writer);
+    }
+    
+    private static Record createRecord(String title) {
+        Record record = new Record();
+        record.setField("Title", title);
+        record.setField("Number", 3.14);
+        record.setField("BirdIQ", Arrays.asList("b","i","r","d","i","q"));
+        return record;
+    }
+
+}
+
+
+
+Code walkthrough
+
+A method createRecord() creates a Record to persist data in a key-value field.
+Record.setField() method is used to add  new fields with the specified field name and value. In this  example there are three fields Title, Number and BirdId and value can be  added to  each field  as record1.setField("Number", 3.14).
+MemoryReader is created to obtain records from an in-memory RecordList.
+AvroWriter is created to write to an output bird-iq.avro file. Null value is passed to the second parameter because there are no any records that are going to be discarded for this example.
+Data are transferred from MemoryReader to AvroWriter  via Job.run() method. See how to compile and  run data pipeline jobs.
+
+
+
+Record
+
+
+Record class holds persistent data in key-value fields as it flows through the pipeline. A method setField() in this class creates  a new field as key-value pair by taking field name and  a value as a parameter.
+
+
+MemoryReader
+
+Obtains records from an in-memory RecordList. You get all records added to this object via getRecordList() method.
+
+RecordList
+
+As the name suggests, it is used to store a list of Record objects in memory. It implements Java's Iterable interface so you can perform operations similar to Java Collections classes on this object.
+
+AvroWriter
+
+Write records to an Apache Avro file. It extends IntegrationWriter and can be created using File and DataWriter or OutputStream and DataWriter objects. If there are any records that doesn't conform for the Avro schema you can discard those records by writing them to DataWriter object and passing the object to  AvroWriter constructor as a second parameter.
+
+
+Output
+The output will be written to the Avro file and stored in the specified location i.e example/data/output. 
+        
+            /*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.core.Record;
+import com.northconcepts.datapipeline.core.RecordList;
+import com.northconcepts.datapipeline.job.Job;
+import com.northconcepts.datapipeline.json.SimpleJsonWriter;
+import com.northconcepts.datapipeline.memory.MemoryReader;
+
+public class WriteSimpleJsonFile {
+
+    public static void main(String[] args) {
+        Record record1 = new Record();
+        record1.setField("country", "Philippines");
+        record1.setField("capital", "Manila");
+        record1.setField("language", "Filipino");
+ 
+        Record record2 = new Record();
+        record2.setField("country", "Japan");
+        record2.setField("capital", "Tokyo");
+        record2.setField("language", "Japanese");
+                
+        DataReader reader = new MemoryReader(new RecordList(record1, record2));
+         
+        DataWriter writer = new SimpleJsonWriter(new File("example/data/output/simple-json-to-file.json"))
+                .setPretty(true);
+         
+        Job.run(reader, writer);
+    }
+}
+
+
+        
+            /*
+ * Copyright (c) 2006-2022 North Concepts Inc.  All rights reserved.
+ * Proprietary and Confidential.  Use is subject to license terms.
+ * 
+ * https://northconcepts.com/data-pipeline/licensing/
+ */
+package com.northconcepts.datapipeline.examples.cookbook;
+
+import java.io.File;
+
+import com.northconcepts.datapipeline.core.DataReader;
+import com.northconcepts.datapipeline.core.DataWriter;
+import com.northconcepts.datapipeline.core.Record;
+import com.northconcepts.datapipeline.core.RecordList;
+import com.northconcepts.datapipeline.job.Job;
+import com.northconcepts.datapipeline.memory.MemoryReader;
+import com.northconcepts.datapipeline.xml.SimpleXmlWriter;
+
+public class WriteSimpleXmlFile {
+
+    public static void main(String[] args) {
+        Record record1 = new Record();
+        record1.setField("country", "Philippines");
+        record1.setField("capital", "Manila");
+        record1.setField("language", "Filipino");
+ 
+        Record record2 = new Record();
+        record2.setField("country", "Japan");
+        record2.setField("capital", "Tokyo");
+        record2.setField("language", "Japanese");
+                
+        DataReader reader = new MemoryReader(new RecordList(record1, record2));
+         
+        DataWriter writer = new SimpleXmlWriter(new File("example/data/output/simple-xml-to-file.xml"))
+                .setPretty(true);
+         
+        Job.run(reader, writer);
+
+    }
+
+}
+
+
+        
