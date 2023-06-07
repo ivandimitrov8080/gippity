@@ -2,9 +2,7 @@ package lib
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strings"
@@ -13,7 +11,7 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-func Gippity(question string, info string, maxTokens int) {
+func Gippity(question string, info string, maxTokens int) *openai.ChatCompletionStream {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -34,7 +32,7 @@ func Gippity(question string, info string, maxTokens int) {
 			},
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: fmt.Sprintf("Please use the provided context with regards to the Java library DataPipeline from NorthConcepts to answer any question you may be asked: {'context': {%s}}", strings.Join(topInfo, "")),
+				Content: fmt.Sprintf("Please use the provided context to answer any subsequent questions.: %s", strings.Join(topInfo, "")),
 			},
 		},
 		Stream: true,
@@ -42,23 +40,24 @@ func Gippity(question string, info string, maxTokens int) {
 	stream, err := c.CreateChatCompletionStream(context.Background(), req)
 	if err != nil {
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
-		return
+		return nil
 	}
-	defer stream.Close()
-
-	fmt.Printf("Stream response: ")
-	for {
-		response, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			fmt.Println("\nStream finished")
-			return
-		}
-
-		if err != nil {
-			fmt.Printf("\nStream error: %v\n", err)
-			return
-		}
-
-		fmt.Printf(response.Choices[0].Delta.Content)
-	}
+	return stream
+	// defer stream.Close()
+	//
+	// fmt.Printf("Stream response: ")
+	// for {
+	// 	response, err := stream.Recv()
+	// 	if errors.Is(err, io.EOF) {
+	// 		fmt.Println("\nStream finished")
+	// 		return nil
+	// 	}
+	//
+	// 	if err != nil {
+	// 		fmt.Printf("\nStream error: %v\n", err)
+	// 		return nil
+	// 	}
+	//
+	// 	fmt.Printf(response.Choices[0].Delta.Content)
+	// }
 }
