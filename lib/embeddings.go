@@ -87,7 +87,8 @@ func TopMatches(questionEmbeddings map[string][]float32, knowledgeEmbeddings map
 	sort.Slice(ss, func(i, j int) bool {
 		return ss[i].Value > ss[j].Value
 	})
-	for i := 0; maxTokens > tokenCount(strings.Join(ans, "")); i++ {
+	l := len(ss)
+	for i := 0; maxTokens > tokenCount(strings.Join(ans, "")) && i < l; i++ {
 		ans = append(ans, ss[i].Key)
 	}
 	return ans
