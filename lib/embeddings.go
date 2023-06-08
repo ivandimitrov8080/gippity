@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/neurosnap/sentences/english"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -16,15 +17,22 @@ const batchSize = 1500
 
 func CreateEmbeddings(client *openai.Client, text string, maxTokens int) map[string][]float32 {
 	fmt.Println("Started embedding")
-	subsections := SplitInfoIntoSubsections(text, maxTokens)
+	tokenizer, err := english.NewSentenceTokenizer(nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	sentences := tokenizer.Tokenize(text)
 	embeds := []openai.Embedding{}
-	subLen := len(subsections)
-	for i := 0; i < subLen; i += batchSize {
+	sentenceCount := len(sentences)
+	for i := 0; i < sentenceCount; i += batchSize {
 		end := i + batchSize
-		if end > subLen {
-			end = subLen
+		if end > sentenceCount {
+			end = sentenceCount
 		}
-		batch := subsections[i:end]
+		var batch []string
+		for i := 0; i < sentenceCount; i++ {
+			batch[i] = sentences[i].Text
+		}
 		fmt.Println("Embedding batch: ", i, " :: ", end)
 		resp, err := client.CreateEmbeddings(context.Background(), openai.EmbeddingRequest{
 			Input: batch,
@@ -39,10 +47,10 @@ func CreateEmbeddings(client *openai.Client, text string, maxTokens int) map[str
 		vectors := resp.Data
 		embeds = append(embeds, vectors...)
 	}
-	if len(embeds) == subLen {
+	if len(embeds) == sentenceCount {
 		m := map[string][]float32{}
-		for i, v := range subsections {
-			m[v] = embeds[i].Embedding
+		for i, v := range sentences {
+			m[v.Text] = embeds[i].Embedding
 		}
 		return m
 	}
@@ -88,7 +96,7 @@ func TopMatches(questionEmbeddings map[string][]float32, knowledgeEmbeddings map
 		return ss[i].Value > ss[j].Value
 	})
 	l := len(ss)
-	for i := 0; maxTokens > tokenCount(strings.Join(ans, "")) && i < l; i++ {
+	for i := 0; maxTokens > CountTokens(strings.Join(ans, ""), openai.GPT3Dot5Turbo0301) && i < l; i++ {
 		ans = append(ans, ss[i].Key)
 	}
 	return ans
