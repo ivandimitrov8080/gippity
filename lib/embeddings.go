@@ -31,7 +31,7 @@ func CreateEmbeddings(client *openai.Client, text string, maxTokens int) map[str
 		}
 		var batch []string
 		for i := 0; i < sentenceCount; i++ {
-			batch[i] = sentences[i].Text
+			batch = append(batch, sentences[i].Text)
 		}
 		fmt.Println("Embedding batch: ", i, " :: ", end)
 		resp, err := client.CreateEmbeddings(context.Background(), openai.EmbeddingRequest{
