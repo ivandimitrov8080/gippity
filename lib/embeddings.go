@@ -15,7 +15,7 @@ import (
 
 const batchSize = 1500
 
-func CreateEmbeddings(client *openai.Client, text string, maxTokens int) map[string][]float32 {
+func CreateEmbeddings(client *openai.Client, text string) map[string][]float32 {
 	fmt.Println("Started embedding")
 	tokenizer, err := english.NewSentenceTokenizer(nil)
 	if err != nil {

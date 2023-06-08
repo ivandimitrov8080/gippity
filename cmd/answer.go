@@ -4,8 +4,13 @@ Copyright © 2023 Ivan Dimitrov ivan@idimitrov.dev
 package cmd
 
 import (
-	"github.com/ivandimitrov8080/gippity/lib"
+	"fmt"
+	"os"
 
+	"github.com/ivandimitrov8080/gippity/lib"
+	"github.com/joho/godotenv"
+
+	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +24,20 @@ var answerCmd = &cobra.Command{
 		question, _ := cmd.Flags().GetString("question")
 		knowledgeBase, _ := cmd.Flags().GetString("knowledge")
 		tokenLimit, _ := cmd.Flags().GetInt("tokens")
-		lib.Gippity(question, knowledgeBase, tokenLimit)
+		godotenv.Load()
+		lib.Init(os.Getenv("OPENAI_KEY"))
+		chat := lib.NewChat(knowledgeBase)
+		chat.Ask(question, tokenLimit)
+		writer := uilive.New()
+		writer.Start()
+		for {
+			msg, err := chat.Messages()
+			if err != nil {
+				writer.Stop()
+				return
+			}
+			fmt.Fprintf(writer, "%s\n", msg[len(msg)-1])
+		}
 	},
 }
 

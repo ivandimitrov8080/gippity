@@ -3,38 +3,35 @@ package lib
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	openai "github.com/sashabaranov/go-openai"
 )
 
+var client *openai.Client
+
 type Chat struct {
-	text string
+	messages  []string
+	knowledge map[string][]float32
 	*openai.ChatCompletionStream
 }
 
-func (chat *Chat) Text() (string, error) {
+func (chat *Chat) Messages() ([]string, error) {
 	response, err := chat.Recv()
 	if err != nil {
-		return "", err
+		return chat.messages, err
 	}
-	chat.text += response.Choices[0].Delta.Content
-	return chat.text, err
+	chat.messages[len(chat.messages)-1] += response.Choices[0].Delta.Content
+	return chat.messages, err
 }
 
-func Gippity(question string, info string, maxTokens int) *Chat {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	c := openai.NewClient(os.Getenv("OPENAI_KEY"))
+func (chat *Chat) SetKnowledge(knowledge string) {
+	chat.knowledge = CreateEmbeddings(client, knowledge)
+}
 
-	knowledgeEmbeddings := CreateEmbeddings(c, info, maxTokens)
-	questionEmbeddings := CreateEmbeddings(c, question, maxTokens)
-	topInfo := TopMatches(questionEmbeddings, knowledgeEmbeddings, maxTokens)
+func (chat *Chat) Ask(question string, maxTokens int) {
+	chat.messages = append(chat.messages, "")
+	topInfo := TopMatches(CreateEmbeddings(client, question), chat.knowledge, maxTokens)
 
 	req := openai.ChatCompletionRequest{
 		Model:     openai.GPT3Dot5Turbo,
@@ -51,10 +48,19 @@ func Gippity(question string, info string, maxTokens int) *Chat {
 		},
 		Stream: true,
 	}
-	stream, err := c.CreateChatCompletionStream(context.Background(), req)
+	stream, err := client.CreateChatCompletionStream(context.Background(), req)
 	if err != nil {
-		fmt.Printf("ChatCompletionStream error: %v\n", err)
-		return nil
+		fmt.Println("Error crating chat completion stream: ", err)
 	}
-	return &Chat{"", stream}
+	chat.ChatCompletionStream = stream
+}
+
+func Init(key string) {
+	if client == nil {
+		client = openai.NewClient(key)
+	}
+}
+
+func NewChat(knowledge string) *Chat {
+	return &Chat{[]string{}, CreateEmbeddings(client, knowledge), nil}
 }
