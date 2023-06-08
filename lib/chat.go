@@ -16,14 +16,13 @@ type Chat struct {
 	*openai.ChatCompletionStream
 }
 
-func (chat *Chat) Text() string {
+func (chat *Chat) Text() (string, error) {
 	response, err := chat.Recv()
 	if err != nil {
-		fmt.Printf("\nStream error: %v\n", err)
-		return ""
+		return "", err
 	}
 	chat.text += response.Choices[0].Delta.Content
-	return chat.text
+	return chat.text, err
 }
 
 func Gippity(question string, info string, maxTokens int) *Chat {
