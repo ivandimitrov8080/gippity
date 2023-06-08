@@ -11,7 +11,22 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-func Gippity(question string, info string, maxTokens int) *openai.ChatCompletionStream {
+type Chat struct {
+	text string
+	*openai.ChatCompletionStream
+}
+
+func (chat *Chat) Text() string {
+	response, err := chat.Recv()
+	if err != nil {
+		fmt.Printf("\nStream error: %v\n", err)
+		return ""
+	}
+	chat.text += response.Choices[0].Delta.Content
+	return chat.text
+}
+
+func Gippity(question string, info string, maxTokens int) *Chat {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -42,22 +57,5 @@ func Gippity(question string, info string, maxTokens int) *openai.ChatCompletion
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
 		return nil
 	}
-	return stream
-	// defer stream.Close()
-	//
-	// fmt.Printf("Stream response: ")
-	// for {
-	// 	response, err := stream.Recv()
-	// 	if errors.Is(err, io.EOF) {
-	// 		fmt.Println("\nStream finished")
-	// 		return nil
-	// 	}
-	//
-	// 	if err != nil {
-	// 		fmt.Printf("\nStream error: %v\n", err)
-	// 		return nil
-	// 	}
-	//
-	// 	fmt.Printf(response.Choices[0].Delta.Content)
-	// }
+	return &Chat{"", stream}
 }
