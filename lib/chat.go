@@ -34,7 +34,7 @@ func (chat *Chat) Ask(question string, maxTokens int) {
 	topInfo := TopMatches(CreateEmbeddings(client, question), chat.knowledge, maxTokens)
 
 	req := openai.ChatCompletionRequest{
-		Model:     openai.GPT3Dot5Turbo,
+		Model:     openai.GPT3Dot5Turbo16K0613,
 		MaxTokens: 200,
 		Messages: []openai.ChatCompletionMessage{
 			{
